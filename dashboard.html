@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface-hover: #222633;
+    --border: #2a2e3d;
+    --text: #e4e6ed;
+    --text-dim: #8b8fa3;
+    --accent: #6c8cff;
+    --accent-dim: #4a6adf;
+    --danger: #ff6b6b;
+    --success: #51cf66;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  /* ---- Layout ---- */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--accent-dim); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+  .card-header .icon { font-size: 1.1rem; }
+
+  .card.span-2 { grid-column: span 2; }
+  @media (max-width: 700px) {
+    .grid { grid-template-columns: 1fr; }
+    .card.span-2 { grid-column: span 1; }
+  }
+
+  /* ---- Header ---- */
+  header {
+    text-align: center;
+    padding: 32px 0 8px;
+  }
+  header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  header p { color: var(--text-dim); font-size: 0.9rem; }
+
+  /* ---- Clock ---- */
+  .clock-time {
+    font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+  .clock-seconds { font-size: 1.5rem; color: var(--accent); }
+  .clock-date { color: var(--text-dim); margin-top: 6px; font-size: 1rem; }
+
+  /* ---- Weather ---- */
+  .weather-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .weather-temp { font-size: 2.8rem; font-weight: 700; }
+  .weather-icon { font-size: 3rem; }
+  .weather-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .weather-details span { display: block; }
+  .weather-details strong { color: var(--text); }
+  .weather-setup { color: var(--text-dim); font-size: 0.9rem; }
+  .weather-setup a { color: var(--accent); text-decoration: none; }
+  .weather-setup code {
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+
+  /* ---- Quote ---- */
+  .quote-text {
+    font-size: 1.1rem;
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .quote-author { color: var(--accent); font-size: 0.9rem; }
+
+  /* ---- GitHub ---- */
+  .gh-event {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+  }
+  .gh-event:last-child { border-bottom: none; }
+  .gh-event-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+  }
+  .gh-event-body { flex: 1; min-width: 0; }
+  .gh-event-repo { color: var(--accent); font-weight: 600; }
+  .gh-event-time { color: var(--text-dim); font-size: 0.78rem; }
+  .gh-setup { color: var(--text-dim); font-size: 0.9rem; }
+
+  /* ---- Quick Links ---- */
+  .links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  .link-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .link-item:hover { border-color: var(--accent); background: var(--surface-hover); }
+  .link-add {
+    border-style: dashed;
+    color: var(--text-dim);
+    cursor: pointer;
+    justify-content: center;
+  }
+
+  /* ---- Todos ---- */
+  .todo-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .todo-input-row input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 0.9rem;
+    outline: none;
+  }
+  .todo-input-row input:focus { border-color: var(--accent); }
+  .todo-input-row button, .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+  .todo-input-row button:hover, .btn:hover { background: var(--accent-dim); }
+  .todo-list { list-style: none; }
+  .todo-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  .todo-item:last-child { border-bottom: none; }
+  .todo-item.done .todo-text { text-decoration: line-through; color: var(--text-dim); }
+  .todo-check {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .todo-item.done .todo-check { border-color: var(--success); background: var(--success); }
+  .todo-text { flex: 1; }
+  .todo-delete {
+    background: none; border: none; color: var(--text-dim); cursor: pointer;
+    font-size: 1rem; padding: 4px; opacity: 0; transition: opacity 0.2s, color 0.2s;
+  }
+  .todo-item:hover .todo-delete { opacity: 1; }
+  .todo-delete:hover { color: var(--danger); }
+  .todo-empty { color: var(--text-dim); font-size: 0.85rem; text-align: center; padding: 16px; }
+
+  /* ---- Settings Modal ---- */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 100;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    width: 90%; max-width: 440px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  .modal h2 { font-size: 1.1rem; margin-bottom: 20px; }
+  .modal label {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+  .modal label:first-of-type { margin-top: 0; }
+  .modal input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 0.9rem;
+    outline: none;
+  }
+  .modal input:focus { border-color: var(--accent); }
+  .modal-actions {
+    display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px;
+  }
+  .btn-secondary {
+    background: var(--bg);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .btn-secondary:hover { border-color: var(--text-dim); }
+
+  /* ---- Settings gear ---- */
+  .settings-btn {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 1.3rem;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.2s, color 0.2s;
+    z-index: 50;
+  }
+  .settings-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ---- Link Modal ---- */
+  .link-modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 100;
+    align-items: center; justify-content: center;
+  }
+  .link-modal-overlay.open { display: flex; }
+</style>
+</head>
+<body>
+
+<header class="container">
+  <h1 id="greeting">Good morning</h1>
+  <p id="greeting-sub">Here's your day at a glance</p>
+</header>
+
+<div class="container">
+  <div class="grid">
+
+    <!-- Clock -->
+    <div class="card" id="clock-card">
+      <div class="card-header"><span class="icon">&#128337;</span> Time</div>
+      <div class="clock-time" id="clock-time"></div>
+      <div class="clock-date" id="clock-date"></div>
+    </div>
+
+    <!-- Weather -->
+    <div class="card" id="weather-card">
+      <div class="card-header"><span class="icon">&#9925;</span> Weather</div>
+      <div id="weather-content">
+        <div class="weather-setup">
+          <p>To enable weather, click the <strong>gear icon</strong> and add:</p>
+          <ul style="margin:8px 0 0 18px;line-height:2">
+            <li>Your city name (e.g. <code>Oslo</code>)</li>
+            <li>A free API key from <a href="https://openweathermap.org/appid" target="_blank">openweathermap.org</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quote -->
+    <div class="card span-2" id="quote-card">
+      <div class="card-header"><span class="icon">&#128172;</span> Daily Quote</div>
+      <div class="quote-text" id="quote-text"></div>
+      <div class="quote-author" id="quote-author"></div>
+    </div>
+
+    <!-- GitHub -->
+    <div class="card span-2" id="github-card">
+      <div class="card-header"><span class="icon">&#128187;</span> GitHub Activity</div>
+      <div id="github-content">
+        <div class="gh-setup">
+          Click the <strong>gear icon</strong> and enter your GitHub username to see recent activity.
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="card" id="links-card">
+      <div class="card-header"><span class="icon">&#128279;</span> Quick Links</div>
+      <div class="links-grid" id="links-grid"></div>
+    </div>
+
+    <!-- Todos -->
+    <div class="card" id="todo-card">
+      <div class="card-header"><span class="icon">&#9745;</span> To-Do</div>
+      <div class="todo-input-row">
+        <input type="text" id="todo-input" placeholder="Add a task..." />
+        <button onclick="addTodo()">Add</button>
+      </div>
+      <ul class="todo-list" id="todo-list"></ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- Settings button -->
+<button class="settings-btn" onclick="openSettings()" title="Settings">&#9881;</button>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <h2>Settings</h2>
+    <label>City</label>
+    <input type="text" id="set-city" placeholder="e.g. Oslo" />
+    <label>OpenWeather API Key</label>
+    <input type="text" id="set-weather-key" placeholder="Paste your key here" />
+    <label>GitHub Username</label>
+    <input type="text" id="set-github" placeholder="e.g. octocat" />
+    <label>Temperature Unit</label>
+    <input type="text" id="set-units" placeholder="metric or imperial (default: metric)" />
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
+      <button class="btn" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Link Modal -->
+<div class="link-modal-overlay" id="link-modal">
+  <div class="modal">
+    <h2>Add Quick Link</h2>
+    <label>Name</label>
+    <input type="text" id="link-name" placeholder="e.g. GitHub" />
+    <label>URL</label>
+    <input type="text" id="link-url" placeholder="e.g. https://github.com" />
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeLinkModal()">Cancel</button>
+      <button class="btn" onclick="saveLink()">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  Storage helpers
+// ============================================================
+const store = {
+  get(key, fallback = null) {
+    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+    catch { return fallback; }
+  },
+  set(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+};
+
+// ============================================================
+//  Greeting
+// ============================================================
+function updateGreeting() {
+  const h = new Date().getHours();
+  const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greeting').textContent = g;
+}
+
+// ============================================================
+//  Clock
+// ============================================================
+function updateClock() {
+  const now = new Date();
+  const h = now.getHours().toString().padStart(2, '0');
+  const m = now.getMinutes().toString().padStart(2, '0');
+  const s = now.getSeconds().toString().padStart(2, '0');
+  document.getElementById('clock-time').innerHTML =
+    `${h}:${m}<span class="clock-seconds">:${s}</span>`;
+  const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('clock-date').textContent = now.toLocaleDateString(undefined, opts);
+}
+setInterval(updateClock, 1000);
+updateClock();
+updateGreeting();
+
+// ============================================================
+//  Quotes (embedded — no flaky API dependency)
+// ============================================================
+const quotes = [
+  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+  { text: "Innovation distinguishes between a leader and a follower.", author: "Steve Jobs" },
+  { text: "Stay hungry, stay foolish.", author: "Stewart Brand" },
+  { text: "Life is what happens when you're busy making other plans.", author: "John Lennon" },
+  { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
+  { text: "It is during our darkest moments that we must focus to see the light.", author: "Aristotle" },
+  { text: "Do what you can, with what you have, where you are.", author: "Theodore Roosevelt" },
+  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+  { text: "Act as if what you do makes a difference. It does.", author: "William James" },
+  { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+  { text: "What we achieve inwardly will change outer reality.", author: "Plutarch" },
+  { text: "The best time to plant a tree was 20 years ago. The second best time is now.", author: "Chinese Proverb" },
+  { text: "Your limitation — it's only your imagination.", author: "Unknown" },
+  { text: "Great things never come from comfort zones.", author: "Unknown" },
+  { text: "Dream it. Wish it. Do it.", author: "Unknown" },
+  { text: "Don't stop when you're tired. Stop when you're done.", author: "Unknown" },
+  { text: "Wake up with determination. Go to bed with satisfaction.", author: "Unknown" },
+  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+  { text: "Everything you've ever wanted is on the other side of fear.", author: "George Addair" },
+  { text: "Simplicity is the ultimate sophistication.", author: "Leonardo da Vinci" },
+  { text: "If you want to lift yourself up, lift up someone else.", author: "Booker T. Washington" },
+  { text: "The mind is everything. What you think you become.", author: "Buddha" },
+  { text: "An unexamined life is not worth living.", author: "Socrates" },
+  { text: "Strive not to be a success, but rather to be of value.", author: "Albert Einstein" },
+  { text: "You miss 100% of the shots you don't take.", author: "Wayne Gretzky" },
+  { text: "The best revenge is massive success.", author: "Frank Sinatra" },
+  { text: "Happiness is not something ready-made. It comes from your own actions.", author: "Dalai Lama" },
+  { text: "Well done is better than well said.", author: "Benjamin Franklin" },
+  { text: "What lies behind us and what lies before us are tiny matters compared to what lies within us.", author: "Ralph Waldo Emerson" },
+  { text: "The only impossible journey is the one you never begin.", author: "Tony Robbins" },
+];
+
+function showQuote() {
+  // Rotate daily: use day-of-year as index
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - start) / 86400000);
+  const q = quotes[dayOfYear % quotes.length];
+  document.getElementById('quote-text').textContent = `"${q.text}"`;
+  document.getElementById('quote-author').textContent = `— ${q.author}`;
+}
+showQuote();
+
+// ============================================================
+//  Weather
+// ============================================================
+async function fetchWeather() {
+  const city = store.get('city', 'Oslo');
+  const key = store.get('weatherKey', '7c2db0a0f52a95ff699b9a8159b1b386');
+  if (!city || !key) return;
+
+  const units = store.get('units', 'metric');
+  const unitLabel = units === 'imperial' ? '°F' : '°C';
+  const speedLabel = units === 'imperial' ? 'mph' : 'm/s';
+
+  try {
+    const res = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${key}&units=${units}`
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const d = await res.json();
+
+    const iconMap = {
+      '01d':'&#9728;','01n':'&#127769;','02d':'&#9925;','02n':'&#9925;',
+      '03d':'&#9729;','03n':'&#9729;','04d':'&#9729;','04n':'&#9729;',
+      '09d':'&#127783;','09n':'&#127783;','10d':'&#127782;','10n':'&#127782;',
+      '11d':'&#9889;','11n':'&#9889;','13d':'&#10052;','13n':'&#10052;',
+      '50d':'&#127787;','50n':'&#127787;'
+    };
+    const ico = d.weather[0]?.icon || '03d';
+
+    document.getElementById('weather-content').innerHTML = `
+      <div class="weather-main">
+        <div class="weather-icon">${iconMap[ico] || '&#9729;'}</div>
+        <div>
+          <div class="weather-temp">${Math.round(d.main.temp)}${unitLabel}</div>
+          <div style="color:var(--text-dim);text-transform:capitalize">${d.weather[0].description}</div>
+        </div>
+      </div>
+      <div class="weather-details">
+        <span><strong>${d.name}</strong></span>
+        <span>Feels like <strong>${Math.round(d.main.feels_like)}${unitLabel}</strong></span>
+        <span>Humidity <strong>${d.main.humidity}%</strong></span>
+        <span>Wind <strong>${d.wind.speed} ${speedLabel}</strong></span>
+      </div>`;
+  } catch (e) {
+    document.getElementById('weather-content').innerHTML =
+      `<div class="weather-setup" style="color:var(--danger)">Failed to load weather: ${e.message}. Check your API key and city name.</div>`;
+  }
+}
+fetchWeather();
+
+// ============================================================
+//  GitHub Activity
+// ============================================================
+async function fetchGitHub() {
+  const user = store.get('github');
+  if (!user) return;
+
+  try {
+    const res = await fetch(`https://api.github.com/users/${encodeURIComponent(user)}/events/public?per_page=10`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const events = await res.json();
+
+    if (!events.length) {
+      document.getElementById('github-content').innerHTML =
+        '<div class="gh-setup">No recent public activity found.</div>';
+      return;
+    }
+
+    const iconFor = t => ({
+      PushEvent: '&#11014;', CreateEvent: '&#10010;', WatchEvent: '&#11088;',
+      ForkEvent: '&#128268;', IssuesEvent: '&#9898;', PullRequestEvent: '&#128256;',
+      IssueCommentEvent: '&#128172;', DeleteEvent: '&#10060;', ReleaseEvent: '&#127991;',
+    }[t] || '&#128312;');
+
+    const descFor = e => {
+      switch (e.type) {
+        case 'PushEvent': {
+          const n = e.payload.commits?.length || 0;
+          return `Pushed ${n} commit${n !== 1 ? 's' : ''}`;
+        }
+        case 'CreateEvent': return `Created ${e.payload.ref_type} ${e.payload.ref || ''}`.trim();
+        case 'WatchEvent': return 'Starred repo';
+        case 'ForkEvent': return 'Forked repo';
+        case 'IssuesEvent': return `${e.payload.action} issue #${e.payload.issue?.number || ''}`;
+        case 'PullRequestEvent': return `${e.payload.action} PR #${e.payload.pull_request?.number || ''}`;
+        case 'IssueCommentEvent': return `Commented on #${e.payload.issue?.number || ''}`;
+        case 'DeleteEvent': return `Deleted ${e.payload.ref_type} ${e.payload.ref || ''}`;
+        case 'ReleaseEvent': return `Released ${e.payload.release?.tag_name || ''}`;
+        default: return e.type.replace('Event', '');
+      }
+    };
+
+    const timeAgo = iso => {
+      const s = Math.floor((Date.now() - new Date(iso)) / 1000);
+      if (s < 60) return 'just now';
+      if (s < 3600) return `${Math.floor(s/60)}m ago`;
+      if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+      return `${Math.floor(s/86400)}d ago`;
+    };
+
+    document.getElementById('github-content').innerHTML = events.slice(0, 8).map(e => `
+      <div class="gh-event">
+        <div class="gh-event-icon">${iconFor(e.type)}</div>
+        <div class="gh-event-body">
+          <span class="gh-event-repo">${e.repo.name}</span>
+          <div>${descFor(e)}</div>
+          <div class="gh-event-time">${timeAgo(e.created_at)}</div>
+        </div>
+      </div>`).join('');
+  } catch (e) {
+    document.getElementById('github-content').innerHTML =
+      `<div class="gh-setup" style="color:var(--danger)">Failed to load GitHub activity: ${e.message}</div>`;
+  }
+}
+fetchGitHub();
+
+// ============================================================
+//  Quick Links
+// ============================================================
+const defaultLinks = [
+  { name: 'GitHub', url: 'https://github.com' },
+  { name: 'Gmail', url: 'https://mail.google.com' },
+  { name: 'YouTube', url: 'https://youtube.com' },
+  { name: 'Reddit', url: 'https://reddit.com' },
+];
+
+function renderLinks() {
+  const links = store.get('links', defaultLinks);
+  const grid = document.getElementById('links-grid');
+  grid.innerHTML = links.map((l, i) => `
+    <a class="link-item" href="${l.url}" target="_blank" title="${l.url}">
+      <span>${l.name}</span>
+    </a>`).join('') +
+    `<div class="link-item link-add" onclick="openLinkModal()">+ Add</div>`;
+}
+renderLinks();
+
+function openLinkModal() {
+  document.getElementById('link-name').value = '';
+  document.getElementById('link-url').value = '';
+  document.getElementById('link-modal').classList.add('open');
+  document.getElementById('link-name').focus();
+}
+function closeLinkModal() { document.getElementById('link-modal').classList.remove('open'); }
+
+function saveLink() {
+  const name = document.getElementById('link-name').value.trim();
+  let url = document.getElementById('link-url').value.trim();
+  if (!name || !url) return;
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  const links = store.get('links', defaultLinks);
+  links.push({ name, url });
+  store.set('links', links);
+  renderLinks();
+  closeLinkModal();
+}
+
+// ============================================================
+//  Todos
+// ============================================================
+function renderTodos() {
+  const todos = store.get('todos', []);
+  const list = document.getElementById('todo-list');
+  if (!todos.length) {
+    list.innerHTML = '<div class="todo-empty">No tasks yet. Add one above.</div>';
+    return;
+  }
+  list.innerHTML = todos.map((t, i) => `
+    <li class="todo-item ${t.done ? 'done' : ''}">
+      <div class="todo-check" onclick="toggleTodo(${i})">${t.done ? '&#10003;' : ''}</div>
+      <span class="todo-text">${escHtml(t.text)}</span>
+      <button class="todo-delete" onclick="deleteTodo(${i})" title="Delete">&#10005;</button>
+    </li>`).join('');
+}
+
+function addTodo() {
+  const input = document.getElementById('todo-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const todos = store.get('todos', []);
+  todos.push({ text, done: false });
+  store.set('todos', todos);
+  input.value = '';
+  renderTodos();
+}
+
+document.getElementById('todo-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTodo();
+});
+
+function toggleTodo(i) {
+  const todos = store.get('todos', []);
+  todos[i].done = !todos[i].done;
+  store.set('todos', todos);
+  renderTodos();
+}
+
+function deleteTodo(i) {
+  const todos = store.get('todos', []);
+  todos.splice(i, 1);
+  store.set('todos', todos);
+  renderTodos();
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+renderTodos();
+
+// ============================================================
+//  Settings
+// ============================================================
+function openSettings() {
+  document.getElementById('set-city').value = store.get('city', '');
+  document.getElementById('set-weather-key').value = store.get('weatherKey', '');
+  document.getElementById('set-github').value = store.get('github', '');
+  document.getElementById('set-units').value = store.get('units', 'metric');
+  document.getElementById('settings-modal').classList.add('open');
+  document.getElementById('set-city').focus();
+}
+
+function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+
+function saveSettings() {
+  store.set('city', document.getElementById('set-city').value.trim());
+  store.set('weatherKey', document.getElementById('set-weather-key').value.trim());
+  store.set('github', document.getElementById('set-github').value.trim());
+  store.set('units', document.getElementById('set-units').value.trim() || 'metric');
+  closeSettings();
+  fetchWeather();
+  fetchGitHub();
+}
+
+// Close modals on overlay click
+document.getElementById('settings-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeSettings();
+});
+document.getElementById('link-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeLinkModal();
+});
+
+// Close modals on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeSettings(); closeLinkModal(); }
+});
+</script>
+</body>
+</html>
